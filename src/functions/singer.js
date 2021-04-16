@@ -1,14 +1,16 @@
 export default class Singer {
-  constructor(name, songText = []) {
-    this.name = name;
-    this.songText = songText;
+  constructor() {
+    this.position = 0;
   }
-  Sing(word = "hello") {
-    console.log("Hello sing");
-    const song = new SpeechSynthesisUtterance(word);
-    window.speechSynthesis.speak(song);
-  }
-  SetSongText(songText) {
-    this.songText = songText;
+  Sing(word, index) {
+    return new Promise((resolve) => {
+      this.position = index;
+      const speech = new SpeechSynthesisUtterance(word);
+      window.speechSynthesis.speak(speech);
+      speech.addEventListener("end", () => {
+        console.log("speech end");
+        resolve();
+      });
+    });
   }
 }

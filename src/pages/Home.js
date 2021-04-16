@@ -12,7 +12,9 @@ const Home = () => {
   const [song, setSong] = React.useState("");
   const [searchText, setSearchText] = React.useState({});
   const [songText, setSongText] = React.useState([]);
-  const robot = new Singer("Thomas");
+  const [playing, setPlaying] = React.useState(false);
+  const [position, setPosition] = React.useState(0);
+  const robot = new Singer();
 
   const getLyrics = async (artist, song) => {
     const baseUrl = "https://api.lyrics.ovh/v1";
@@ -34,6 +36,23 @@ const Home = () => {
     })();
   }, [searchText]);
 
+  React.useEffect(() => {
+    console.log(playing);
+    if (playing) {
+      (async () => {
+        for (let i = position; i < songText.length; i++) {
+          setPosition(i);
+          await robot.Sing(songText[i]);
+          console.log(i);
+          if (!playing) {
+            console.log("hello break");
+            return;
+          }
+        }
+      })();
+    }
+  }, [playing]);
+
   return (
     <Main>
       <SearchField
@@ -42,29 +61,21 @@ const Home = () => {
       />
       <SearchField handleChange={(e) => setSong(e.target.value)} label="Song" />
       <Button
-        onClick={() => {
+        handleClick={() => {
           setSearchText({
             artist: artist,
             song: song,
           });
         }}
-      >
-        Search
-      </Button>
-      <SongText>
-        {songText?.map((word, key) => {
-          return (
-            <span
-              key={key}
-              onClick={() => {
-                robot.Sing(word);
-              }}
-            >
-              {word}{" "}
-            </span>
-          );
-        })}
-      </SongText>
+        buttonText="Search"
+      />
+      <Button
+        handleClick={() => setPlaying(!playing)}
+        buttonText={
+          playing ? "Pause button doesn't work yet, so enjoy!" : "Play"
+        }
+      />
+      <SongText words={songText} highlight={position} />
     </Main>
   );
 };
