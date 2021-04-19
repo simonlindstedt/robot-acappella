@@ -37,11 +37,11 @@ const Home = () => {
         if (!playing) {
           break;
         }
-        await setPosition(i);
+        setPosition(i);
         await robot.Sing(songText[i]);
       }
-      setPosition(0);
       setPlaying(false);
+      setPosition(0);
     })();
   }, [playing]);
 
