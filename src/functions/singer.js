@@ -1,14 +1,12 @@
 export default class Singer {
-  constructor() {
-    this.position = 0;
-  }
-  Sing(word, index) {
+  Sing(word) {
     return new Promise((resolve) => {
-      this.position = index;
       const speech = new SpeechSynthesisUtterance(word);
+      const random = Math.random() * 2;
+      speech.pitch = random;
+      speech.rate = 1.3;
       window.speechSynthesis.speak(speech);
       speech.addEventListener("end", () => {
-        console.log("speech end");
         resolve();
       });
     });

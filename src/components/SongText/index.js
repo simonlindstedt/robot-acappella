@@ -1,21 +1,9 @@
 import { StyledSongWrapper } from "./styles.js";
 
-const SongText = ({ words, highlight, position }) => {
+const SongText = ({ children }) => {
   return (
     <StyledSongWrapper>
-      <p>
-        {words?.map((word, key) => {
-          return (
-            <span
-              key={key}
-              className={key === highlight ? "active" : ""}
-              onClick={position}
-            >
-              {word}{" "}
-            </span>
-          );
-        })}
-      </p>
+      <p>{children}</p>
     </StyledSongWrapper>
   );
 };

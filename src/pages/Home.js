@@ -3,54 +3,46 @@ import Button from "../components/Button";
 import Main from "../components/Main";
 import SearchField from "../components/SearchField";
 import SongText from "../components/SongText";
-
-import stringToWordsArray from "../functions/stringToWordsArray.js";
+import { stringToWordsArray, getLyrics } from "../functions/utils.js";
 import Singer from "../functions/singer.js";
+const robot = new Singer();
 
 const Home = () => {
   const [artist, setArtist] = React.useState("");
   const [song, setSong] = React.useState("");
   const [searchText, setSearchText] = React.useState({});
-  const [songText, setSongText] = React.useState([]);
-  const [playing, setPlaying] = React.useState(false);
+  const [songText, setSongText] = React.useState(["Search", "above"]);
   const [position, setPosition] = React.useState(0);
-  const robot = new Singer();
-
-  const getLyrics = async (artist, song) => {
-    const baseUrl = "https://api.lyrics.ovh/v1";
-    const response = await fetch(`${baseUrl}/${artist}/${song}`);
-    return await response.json();
-  };
+  const [playing, setPlaying] = React.useState(false);
 
   React.useEffect(() => {
-    if (Object.entries(searchText) < 2) {
-      return;
-    }
     const { artist, song } = searchText;
-
-    (async () => {
-      const { lyrics } = await getLyrics(artist, song);
-      if (lyrics) {
-        setSongText(stringToWordsArray(lyrics));
-      }
-    })();
-  }, [searchText]);
-
-  React.useEffect(() => {
-    console.log(playing);
-    if (playing) {
+    if (artist && song) {
       (async () => {
-        for (let i = position; i < songText.length; i++) {
-          setPosition(i);
-          await robot.Sing(songText[i]);
-          console.log(i);
-          if (!playing) {
-            console.log("hello break");
-            return;
-          }
+        const { lyrics } = await getLyrics(artist, song);
+        if (lyrics) {
+          setSongText(stringToWordsArray(lyrics));
+        } else {
+          setSongText(
+            stringToWordsArray("Could not find anything, try again!")
+          );
         }
       })();
     }
+  }, [searchText]);
+
+  React.useEffect(() => {
+    (async () => {
+      for (let i = position; i < songText.length; i++) {
+        if (!playing) {
+          break;
+        }
+        await setPosition(i);
+        await robot.Sing(songText[i]);
+      }
+      setPosition(0);
+      setPlaying(false);
+    })();
   }, [playing]);
 
   return (
@@ -71,11 +63,21 @@ const Home = () => {
       />
       <Button
         handleClick={() => setPlaying(!playing)}
-        buttonText={
-          playing ? "Pause button doesn't work yet, so enjoy!" : "Play"
-        }
+        buttonText={playing ? "Pause doesn't work yet, sorry!" : "Play"}
       />
-      <SongText words={songText} highlight={position} />
+      <SongText>
+        {songText?.map((word, key) => {
+          return (
+            <span
+              key={key}
+              onClick={() => setPosition(key)}
+              className={position === key ? "active" : ""}
+            >
+              {word}{" "}
+            </span>
+          );
+        })}
+      </SongText>
     </Main>
   );
 };
